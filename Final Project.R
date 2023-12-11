@@ -1,7 +1,7 @@
 #Mekias Kebede
-#11/27/2023
+#12/10/2023
 #INFO201 Final Project - Data Wrangling
-#I worked on this project all on my own. 
+#I worked on this project all on my own without a team. 
 
 library("stringr")
 library(testthat)
@@ -10,11 +10,12 @@ library(ggplot2)
 library(readxl)
 
 #Reading in Data (4 data sets used in my analysis)
-setwd("/Users/mekiaskebede/Desktop/INFO201/Data")
+setwd("/Users/mekiaskebede/Desktop/INFO201/Final")
 microsoft <- na.omit(read.csv("MSFT.csv"))
 google <- na.omit(read.csv("Google.csv"))
 apple <- na.omit(read.csv("AAPL.csv"))
 poverty <- na.omit(read_excel("hstpov13.xlsx"))
+poverty2 <- read.csv("pip_dataset.csv")
 
 #Data Cleaning & Augmentation
 yr1 <- vector()
@@ -102,6 +103,9 @@ grouped <- group_by(df2, yr)
 df2_high <- summarize(grouped, avg_High.google = mean(High.google), avg_High.microsoft = mean(High.microsoft), avg_High.apple = mean(High.apple))
 df2_vol <- summarize(grouped, avg_vol.google = mean(Volume.google), avg_vol.microsoft = mean(Volume.microsoft), avg_vol.apple = mean(Volume.apple))
 
+grouped_pov <- group_by(poverty2, country)
+pov3 <- summarize(grouped_pov, avg_gini = mean(gini), yr = year, country = country)
+
 # homeless/poverty data in relation to tech company stock data
 names(poverty)[1] <- "yr"
 poverty$yr[3] <- "2020"
@@ -118,3 +122,10 @@ poverty <- poverty[-c(7, 11),]
 
 # Merging poverty data into summarized data frame
 df3_pov <- merge(x = df2_high, y = poverty, by = "yr")
+
+#visualizations
+goog1 <- ggplot(data = df3_pov) + geom_bar(mapping = aes(x = yr, y = avg_High.google), stat = 'identity')
+micro2 <- ggplot(data = df3_pov) + geom_bar(mapping = aes(x = yr, y = avg_High.microsoft), stat = 'identity')
+appl3 <- ggplot(data = df3_pov) + geom_bar(mapping = aes(x = yr, y = avg_High.apple), stat = 'identity')
+pov4 <- ggplot(data = df3_pov, aes(x = yr, y = `total_poverty (thousands)`, group = 1)) + geom_line() + geom_point()
+gini_USA_trend <-ggplot(data = filter(poverty2, country == "United States")) + geom_point(mapping = aes(x = year, y = gini, color = headcount_4000))
